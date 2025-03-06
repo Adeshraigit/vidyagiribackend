@@ -16,7 +16,7 @@ const app = express();
 const port = 3005;
 
 app.use(cors({
-  origin: "https://vidyagiri.vercel.app/", // Set the allowed origin explicitly
+  origin: "https://vidyagiri.vercel.app", // Set the allowed origin explicitly
   credentials: true, // Allow credentials (cookies, authorization headers, etc.)
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
