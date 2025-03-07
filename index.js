@@ -262,6 +262,7 @@ const fetchAndProcess = async (item) => {
 
 // Main route handler for processing queries (POST /)
 app.post('/', async (req, res) => {
+  const { userId } = getAuth(req); // Get user ID from Clerk
   const {
     message,
     returnSources = true,
@@ -349,6 +350,7 @@ app.post('/', async (req, res) => {
 });
 
 app.post('/audio', async (req, res) => {
+  const { userId } = getAuth(req); // Get user ID from Clerk
   const {
     message,
     returnSources = true,
@@ -437,6 +439,7 @@ app.post('/audio', async (req, res) => {
 
 // New endpoint to handle kinesthetic learning requests (POST /kinesthetic)
 app.post('/kinesthetic', async (req, res) => {
+  const { userId } = getAuth(req); // Get user ID from Clerk
   const {
     message,
     returnSources = true,
