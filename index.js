@@ -276,20 +276,20 @@ app.post('/', requireAuth(), async (req, res) => {
     const varkStyle = preferredStyle || await detectVarkStyle(message);
     console.log(`Detected/Selected VARK style: ${varkStyle}`);
 
-    let existingMetadata = await clerkClient.users.getUser(userId);
-    let previousQueries = existingMetadata.publicMetadata?.queries || [];
+    // let existingMetadata = await clerkClient.users.getUser(userId);
+    // let previousQueries = existingMetadata.publicMetadata?.queries || [];
 
-    // Append the new query
-    previousQueries.push({
-      message,
-      varkStyle,
-      timestamp: new Date().toISOString()
-    });
+    // // Append the new query
+    // previousQueries.push({
+    //   message,
+    //   varkStyle,
+    //   timestamp: new Date().toISOString()
+    // });
 
-    // Update Clerk metadata
-    await clerkClient.users.updateUserMetadata(userId, {
-      publicMetadata: { queries: previousQueries }
-    });
+    // // Update Clerk metadata
+    // await clerkClient.users.updateUserMetadata(userId, {
+    //   publicMetadata: { queries: previousQueries }
+    // });
 
     // Get and process sources using the search engine function
     const sources = await searchEngineForSources(message);
