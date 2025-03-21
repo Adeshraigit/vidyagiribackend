@@ -72,7 +72,7 @@ const varkPrompts = {
 async function rephraseInput(inputString) {
   console.log(`Rephrasing input...`);
   const groqResponse = await openai.chat.completions.create({
-    model: "mixtral-8x7b-32768",
+    model: "llama-3.3-70b-versatile",
     messages: [
       { role: "system", content: "You are a rephraser and always respond with a rephrased version of the input that is given to a search engine API. Always be succint and use the same words as the input. ONLY RETURN THE REPHRASED VERSION OF THE INPUT." },
       { role: "user", content: inputString },
@@ -85,7 +85,7 @@ async function rephraseInput(inputString) {
 async function rephraseInputDiagram(inputString) {
   console.log(`Rephrasing input...`);
   const groqResponse = await openai.chat.completions.create({
-    model: "mixtral-8x7b-32768",
+    model: "llama-3.3-70b-versatile",
     messages: [
       { role: "system", content: "You are a rephraser and always respond with a rephrased version of the input that is given to a Rapid API that generates diagrams from query.So repharese the input so that it can be used to generate diagrams based on plantUML format. ONLY RETURN THE REPHRASED VERSION OF THE INPUT." },
       { role: "user", content: inputString },
@@ -105,7 +105,7 @@ async function generateVarkStyleFollowUpQuestions(responseText, varkStyle) {
   };
 
   const groqResponse = await openai.chat.completions.create({
-    model: "mixtral-8x7b-32768",
+    model: "llama-3.3-70b-versatile",
     messages: [
       {
         role: "system",
@@ -320,7 +320,7 @@ app.post('/', async (req, res) => {
         }
       ],
       stream: true,
-      model: "mixtral-8x7b-32768"
+      model: "llama-3.3-70b-versatile"
     });
 
     // Stream the response back to the client
@@ -408,7 +408,7 @@ app.post('/audio',async (req, res) => {
         }
       ],
       stream: true,
-      model: "mixtral-8x7b-32768"
+      model: "llama-3.3-70b-versatile"
     });
 
     // Stream the response back to the client
@@ -482,7 +482,7 @@ app.post('/kinesthetic',async (req, res) => {
         }
       ],
       stream: true,
-      model: "mixtral-8x7b-32768"
+      model: "llama-3.3-70b-versatile"
     });
 
     // Stream the response back to the client
