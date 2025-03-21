@@ -21,7 +21,7 @@ app.use(cors({
   methods: ["GET", "POST", "PUT", "DELETE"],
   allowedHeaders: ["Content-Type", "Authorization"],
 }));
-app.options("*", cors()); 
+// app.options("*", cors()); 
 app.use(bodyParser.json());
 app.use(clerkMiddleware());
 
