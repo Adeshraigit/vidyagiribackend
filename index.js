@@ -452,7 +452,6 @@ app.post('/kinesthetic',async (req, res) => {
     const varkStyle = 'kinesthetic';
     console.log(`Selected VARK style: ${varkStyle}`);
 
-    // let existingMetadata = await clerkClient.users.getUser(userId);
     // let previousQueries = existingMetadata.publicMetadata?.queries || [];
 
     // // Append the new query
@@ -512,63 +511,99 @@ app.post('/kinesthetic',async (req, res) => {
 
 
 // New endpoint to generate a flowchart/diagram using the RapidAPI Diagram Generator (POST /diagram)
+// app.post('/diagram', async (req, res) => {
+//   let { query } = req.body; // Default value
+
+//   try {
+//     // Step 1: Rephrase user query
+//     query = await rephraseInputDiagram(query);
+
+//     // Step 2: Call the RapidAPI diagram generator
+//     const options = {
+//       method: 'POST',
+//       url: 'https://ai-flowchart-diagram-generator.p.rapidapi.com/',
+//       headers: {
+//         'x-rapidapi-key': process.env.RAPIDAPI_KEY,
+//         'x-rapidapi-host': 'ai-flowchart-diagram-generator.p.rapidapi.com',
+//         'Content-Type': 'application/json'
+//       },
+//       data: {
+//         jsonBody: {
+//           function_name: 'diagram_generator',
+//           query: query,
+//           output_type: 'png'
+//         }
+//       }
+//     };
+
+//     const response = await axios.request(options);
+//     console.log('Diagram API response:', response.data);
+
+//     res.status(200).json(response.data);
+//   } catch (error) {
+//     console.error('Diagram API error:', error.response ? error.response.data : error.message);
+//     res.status(500).json({
+//       error: error.response ? error.response.data : 'Internal Server Error'
+//     });
+//   }
+// });
+
 app.post('/diagram', async (req, res) => {
-  let { query } = req.body; // Default value
+  const {
+    message,
+    returnSources = true,
+    returnFollowUpQuestions = true,
+    embedSourcesInLLMResponse = false
+  } = req.body;
 
   try {
-    // Step 1: Rephrase user query
-    query = await rephraseInputDiagram(query);
+    const varkStyle = 'visual';
+    console.log(`Selected VARK style: ${varkStyle}`);
 
-    // Step 2: Call the RapidAPI diagram generator
-    const options = {
-      method: 'POST',
-      url: 'https://ai-flowchart-diagram-generator.p.rapidapi.com/',
-      headers: {
-        'x-rapidapi-key': process.env.RAPIDAPI_KEY,
-        'x-rapidapi-host': 'ai-flowchart-diagram-generator.p.rapidapi.com',
-        'Content-Type': 'application/json'
-      },
-      data: {
-        jsonBody: {
-          function_name: 'diagram_generator',
-          query: query,
-          output_type: 'png'
+    // Call Groq (or OpenAI) API for Mermaid-based response
+    const chatCompletion = await openai.chat.completions.create({
+      messages: [
+        {
+          role: "system",
+          content: `You are an expert assistant specialized for visual learners.
+1. Start with a brief explanation of the topic.
+2. Then, provide a structured Mermaid.js diagram.
+3. Wrap the diagram in triple backticks with 'mermaid' keyword.
+Only output the explanation and diagram.`
+        },
+        {
+          role: "user",
+          content: `Topic: ${message}`
         }
+      ],
+      stream: true,
+      model: "llama-3.3-70b-versatile"
+    });
+
+    let responseTotal = "";
+    for await (const chunk of chatCompletion) {
+      if (chunk.choices[0].delta && chunk.choices[0].finish_reason !== "stop") {
+        responseTotal += chunk.choices[0].delta.content;
+      } else {
+        const responseObj = {
+          varkStyle,
+          answer: responseTotal,
+          ...(returnFollowUpQuestions && {
+            followUpQuestions: await generateVarkStyleFollowUpQuestions(responseTotal, varkStyle)
+          })
+        };
+        res.status(200).json(responseObj);
       }
-    };
-
-    const response = await axios.request(options);
-    console.log('Diagram API response:', response.data);
-
-    res.status(200).json(response.data);
+    }
   } catch (error) {
-    console.error('Diagram API error:', error.response ? error.response.data : error.message);
+    console.error('Error processing visual request:', error);
     res.status(500).json({
-      error: error.response ? error.response.data : 'Internal Server Error'
+      error: 'An error occurred processing your request',
+      details: error.message
     });
   }
 });
 
-
-// app.post("/result", requireAuth(), async (req, res) => {
-//   const { userId } = getAuth(req); // Get user ID from Clerk
-//   const { preference } = req.body;
-
-//   if (!preference) {
-//     return res.status(400).json({ message: "Missing required field: preference" });
-//   }
-
-//   try {
-//     await clerkClient.users.updateUserMetadata(userId, {
-//       publicMetadata: { preference, formSubmitted: true },
-//     });
-
-//     res.status(200).json({ message: "Results saved successfully" });
-//   } catch (error) {
-//     console.error("Error saving VARK results:", error);
-//     res.status(500).json({ message: "Failed to save results" });
-//   }
-// });
 
 app.post("/result", requireAuth(), async (req, res) => {
   const { userId } = getAuth(req); // Get user ID from Clerk
@@ -596,7 +631,6 @@ app.post("/result", requireAuth(), async (req, res) => {
     res.status(500).json({ message: "Failed to save results" });
   }
 });
-
 
 app.get("/",(req, res) => {
   res.send("Hello World");
