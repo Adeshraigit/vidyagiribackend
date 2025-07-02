@@ -7,7 +7,6 @@ import OpenAI from 'openai';
 import cheerio from 'cheerio';
 import dotenv from 'dotenv';
 import cors from 'cors';
-import axios from 'axios';
 import { clerkMiddleware, clerkClient, requireAuth, getAuth } from '@clerk/express'
 // Load environment variables
 dotenv.config();
@@ -262,7 +261,6 @@ const fetchAndProcess = async (item) => {
 
 // Main route handler for processing queries (POST /)
 app.post('/', async (req, res) => {
-  // const { userId } = getAuth(req); // Get user ID from Clerk
   const {
     message,
     returnSources = true,
@@ -275,21 +273,6 @@ app.post('/', async (req, res) => {
     // Detect VARK style (or use the provided one)
     const varkStyle = preferredStyle || await detectVarkStyle(message);
     console.log(`Detected/Selected VARK style: ${varkStyle}`);
-
-    // let existingMetadata = await clerkClient.users.getUser(userId);
-    // let previousQueries = existingMetadata.publicMetadata?.queries || [];
-
-    // // Append the new query
-    // previousQueries.push({
-    //   message,
-    //   varkStyle,
-    //   timestamp: new Date().toISOString()
-    // });
-
-    // // Update Clerk metadata
-    // await clerkClient.users.updateUserMetadata(userId, {
-    //   publicMetadata: { queries: previousQueries }
-    // });
 
     // Get and process sources using the search engine function
     const sources = await searchEngineForSources(message);
@@ -364,21 +347,6 @@ app.post('/audio',async (req, res) => {
     const varkStyle = preferredStyle || await detectVarkStyle(message);
     console.log(`Detected/Selected VARK style: ${varkStyle}`);
 
-    // let existingMetadata = await clerkClient.users.getUser(userId);
-    // let previousQueries = existingMetadata.publicMetadata?.queries || [];
-
-    // // Append the new query
-    // previousQueries.push({
-    //   message,
-    //   varkStyle,
-    //   timestamp: new Date().toISOString()
-    // });
-
-    // // Update Clerk metadata
-    // await clerkClient.users.updateUserMetadata(userId, {
-    //   publicMetadata: { queries: previousQueries }
-    // });
-
     // Get and process sources using the search engine function
     const sources = await searchEngineForSources(message);
     const sourcesParsed = sources
@@ -451,21 +419,6 @@ app.post('/kinesthetic',async (req, res) => {
     // Set the VARK style to kinesthetic
     const varkStyle = 'kinesthetic';
     console.log(`Selected VARK style: ${varkStyle}`);
-
-    // let previousQueries = existingMetadata.publicMetadata?.queries || [];
-
-    // // Append the new query
-    // previousQueries.push({
-    //   message,
-    //   varkStyle,
-    //   timestamp: new Date().toISOString()
-    // });
-
-    // // Update Clerk metadata
-    // await clerkClient.users.updateUserMetadata(userId, {
-    //   publicMetadata: { queries: previousQueries }
-    // });
-
 
     // Generate response with kinesthetic-specific formatting
     const chatCompletion = await openai.chat.completions.create({
